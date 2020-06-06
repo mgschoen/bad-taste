@@ -5,7 +5,7 @@ export default class QuotesList extends Component {
         super(...arguments);
 
         this.usersApiBaseUrl = 'https://randomuser.me/api/';
-        this.quotesApiBaseUrl = 'https://binaryjazz.us/wp-json/genrenator/v1/story/'
+        this.quotesApiBaseUrl = 'https://binaryjazz.us/wp-json/genrenator/v1/story/';
         this.users = [];
         this.quotes = [];
         this.model = [];
@@ -20,6 +20,9 @@ export default class QuotesList extends Component {
         this.fetchWorker = null;
         this.sortWorker = null;
 
+        this.fetchTimerId = null;
+        this.sortTimerId = null;
+
         this.init();
     }
 
@@ -27,15 +30,6 @@ export default class QuotesList extends Component {
         this.tableBody = this.el.querySelector('[data-quotes-list-el="table-body"]');
         this.counter = this.el.querySelector('[data-quotes-list-el="counter"]');
 
-        this.useWorkers = this.data.useWorkers === 'true';
-        if (this.useWorkers) {
-            this.fetchWorker = new Worker('../workers/FetchWorker.js');
-            this.sortWorker = new Worker('../workers/SortWorker.js');
-            this.fetchWorker.addEventListener('message', this.onFetchWorkerMessage);
-            this.sortWorker.addEventListener('message', this.onSortWorkerMessage);
-            this.fetchWorker.postMessage('fetch worker, are you there?');
-            this.sortWorker.postMessage('sort worker, are you there?');
-        }
 
         this.tableRowPrototype = this.el
             .querySelector('[data-quotes-list-el="table-row-prototype"]')
@@ -48,8 +42,18 @@ export default class QuotesList extends Component {
 
         this.subscribe('SORT_REQUESTED', this.onSortRequested);
 
-        this.boundFetchData = this.fetchData.bind(this);
-        this.fetchData();
+        this.useWorkers = this.data.useWorkers === 'true';
+        if (this.useWorkers) {
+            this.fetchWorker = new Worker('../workers/FetchWorker.js');
+            this.sortWorker = new Worker('../workers/SortWorker.js');
+            this.boundOnFetchWorkerMessage = this.onFetchWorkerMessage.bind(this);
+            this.boundOnSortWorkerMessage = this.onSortWorkerMessage.bind(this);
+            this.fetchWorker.addEventListener('message', this.boundOnFetchWorkerMessage);
+            this.sortWorker.addEventListener('message', this.boundOnSortWorkerMessage);
+        } else {
+            this.boundFetchData = this.fetchData.bind(this);
+            this.fetchData();
+        }
     }
 
     onSortRequested(data) {
@@ -64,7 +68,23 @@ export default class QuotesList extends Component {
     }
 
     onFetchWorkerMessage(event) {
-        console.log(event);
+        if (event.data.action === 'fetchStart') {
+            this.startFetchTimer('fetch-worker');
+            this.publish('LOADING', true);
+            return;
+        }
+        if (event.data.action === 'fetchSuccess') {
+            this.model.unshift(...event.data.payload);
+            if (this.model.length > this.max) {
+                this.model = this.model.slice(0, this.max);
+            }
+            if (this.sorted) {
+                this.sortByProperty(this.sortData.property, this.sortData.order);
+            }
+            this.updateView();
+            this.publish('LOADING', false);
+            this.stopFetchTimer();
+        }
     }
 
     onSortWorkerMessage(event) {
@@ -72,8 +92,7 @@ export default class QuotesList extends Component {
     }
 
     async fetchData() {
-        const timerId = `fetch-${new Date().getTime()}`;
-        console.time(timerId);
+        this.startFetchTimer('fetch');
         this.publish('LOADING', true);
         const num = Math.floor(Math.random() * (this.fetchMax - this.fetchMin + 1)) + this.fetchMin;
         await this.fetchUsers(num);
@@ -84,7 +103,7 @@ export default class QuotesList extends Component {
         }
         this.updateView();
         this.publish('LOADING', false);
-        console.timeEnd(timerId);
+        this.stopFetchTimer();
         window.setTimeout(this.boundFetchData, this.fetchInterval);
     }
 
@@ -134,5 +153,15 @@ export default class QuotesList extends Component {
             this.tableBody.insertAdjacentHTML('beforeend', hydratedTemplate);
         }
         this.counter.textContent = this.model.length >= this.max ? 'max' : this.model.length;
+    }
+
+    startFetchTimer(prefix) {
+        this.fetchTimerId = `${prefix}-${new Date().getTime()}`;
+        console.time(this.fetchTimerId);
+    }
+
+    stopFetchTimer() {
+        console.timeEnd(this.fetchTimerId);
+        this.fetchTimerId = null;
     }
 }
