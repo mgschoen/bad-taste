@@ -139,7 +139,12 @@ export default class QuotesList extends Component {
         this.model.sort((a, b) => {
             const propertyA = a[property];
             const propertyB = b[property];
-            return this.sortFunctions[order](propertyA, propertyB);
+            let result = null;
+            // synthetically adding complexity to simulate expensive calculations
+            for (let i = 0; i < this.model.length; i++) {
+                result = this.sortFunctions[order](propertyA, propertyB);
+            }
+            return result;
         });
     }
 
