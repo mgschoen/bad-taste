@@ -39,14 +39,19 @@ export default class QuotesList extends Component {
     }
 
     onSortRequested(data) {
+        const timerId = `sort-${new Date().getTime()}`;
+        console.time(timerId);
         this.sortByProperty(data.property, data.order);
         this.sorted = true;
         this.sortData = data;
         this.updateView();
         this.publish('SORTED', data);
+        console.timeEnd(timerId);
     }
 
     async fetchData() {
+        const timerId = `fetch-${new Date().getTime()}`;
+        console.time(timerId);
         this.publish('LOADING', true);
         const num = Math.floor(Math.random() * (this.fetchMax - this.fetchMin + 1)) + this.fetchMin;
         await this.fetchUsers(num);
@@ -57,6 +62,7 @@ export default class QuotesList extends Component {
         }
         this.updateView();
         this.publish('LOADING', false);
+        console.timeEnd(timerId);
         window.setTimeout(this.boundFetchData, this.fetchInterval);
     }
 
