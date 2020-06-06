@@ -1,0 +1,19 @@
+{
+  "name": "bad-taste",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel ./src/index.html ./src/worker.js",
+    "build": "parcel build ./src/index.html ./src/worker.js"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "sass": "^1.26.8"
+  },
+  "dependencies": {
+    "bootstrap": "^4.5.0",
+    "component-loader-js": "^4.0.0",
+    "regenerator-runtime": "^0.13.5"
+  }
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bad Taste</title>
+    <link rel="stylesheet" href="./styles.scss">
+</head>
+
+<body>
+    <div class="container">
+        <section class="jumbotron text-center">
+            <h1>What people say about music</h1>
+        </section>
+        <table class="table" data-component="QuotesList" data-settings='{"abc": "def"}'>
+            <thead>
+                <tr>
+                    <th scope="col" data-component="LoadingSpinner">
+                        <button data-component="SortButton" data-property="name" type="button" class="btn btn-outline-secondary btn-sm">↓</button>
+                        <div data-loading-spinner-el="busy" class="spinner-border spinner-border-sm d-none" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <span data-loading-spinner-el="idle">Names</span>
+                    </th>
+                    <th scope="col" data-component="LoadingSpinner">
+                        <button data-component="SortButton" data-property="from" type="button" class="btn btn-outline-secondary btn-sm">↓</button>
+                        <div data-loading-spinner-el="busy" class="spinner-border spinner-border-sm d-none" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <span data-loading-spinner-el="idle">From</span>
+                    </th>
+                    <th scope="col" data-component="LoadingSpinner">
+                        <button data-component="SortButton" data-property="quote" type="button" class="btn btn-outline-secondary btn-sm">↓</button>
+                        <div data-loading-spinner-el="busy" class="spinner-border spinner-border-sm d-none" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <span data-loading-spinner-el="idle">
+                            Quotes
+                            <span data-quotes-list-el="counter" class="badge badge-primary"></span>
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody data-quotes-list-el="table-body"></tbody>
+            <tfoot class="invisible">
+                <tr data-quotes-list-el="table-row-prototype">
+                    <td>__proto_name__</td>
+                    <td>__proto_from__</td>
+                    <td>__proto_quote__</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <script src="./main.js"></script>
+</body>
+
+</html>
