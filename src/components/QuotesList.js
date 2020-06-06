@@ -16,12 +16,26 @@ export default class QuotesList extends Component {
         this.fetchMax = 80;
         this.fetchInterval = 2000;
 
+        this.useWorkers = false;
+        this.fetchWorker = null;
+        this.sortWorker = null;
+
         this.init();
     }
 
     init() {
         this.tableBody = this.el.querySelector('[data-quotes-list-el="table-body"]');
         this.counter = this.el.querySelector('[data-quotes-list-el="counter"]');
+
+        this.useWorkers = this.data.useWorkers === 'true';
+        if (this.useWorkers) {
+            this.fetchWorker = new Worker('../workers/FetchWorker.js');
+            this.sortWorker = new Worker('../workers/SortWorker.js');
+            this.fetchWorker.addEventListener('message', this.onFetchWorkerMessage);
+            this.sortWorker.addEventListener('message', this.onSortWorkerMessage);
+            this.fetchWorker.postMessage('fetch worker, are you there?');
+            this.sortWorker.postMessage('sort worker, are you there?');
+        }
 
         this.tableRowPrototype = this.el
             .querySelector('[data-quotes-list-el="table-row-prototype"]')
@@ -47,6 +61,14 @@ export default class QuotesList extends Component {
         this.updateView();
         this.publish('SORTED', data);
         console.timeEnd(timerId);
+    }
+
+    onFetchWorkerMessage(event) {
+        console.log(event);
+    }
+
+    onSortWorkerMessage(event) {
+        console.log(event);
     }
 
     async fetchData() {
