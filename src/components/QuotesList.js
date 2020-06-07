@@ -10,7 +10,7 @@ export default class QuotesList extends Component {
         this.quotes = [];
         this.model = [];
         this.sorted = false;
-        this.sortData = {};
+        this.sortInfo = {};
         this.max = 1500;
         this.fetchMin = 40;
         this.fetchMax = 80;
@@ -29,7 +29,6 @@ export default class QuotesList extends Component {
     init() {
         this.tableBody = this.el.querySelector('[data-quotes-list-el="table-body"]');
         this.counter = this.el.querySelector('[data-quotes-list-el="counter"]');
-
 
         this.tableRowPrototype = this.el
             .querySelector('[data-quotes-list-el="table-row-prototype"]')
@@ -57,14 +56,29 @@ export default class QuotesList extends Component {
     }
 
     onSortRequested(data) {
-        const timerId = `sort-${new Date().getTime()}`;
-        console.time(timerId);
-        this.sortByProperty(data.property, data.order);
+        this.startSortTimer(this.useWorkers ? 'sort-worker' : 'sort');
+        this.sortInfo = data;
+        if (this.useWorkers) {
+            this.sortWorker.postMessage({
+                action: 'sort',
+                sortInfo: data,
+                payload: this.model
+            });
+        } else {
+            this.sortByProperty(data.property, data.order);
+            this.onSortFinished(data);
+        }
+    }
+
+    onSortFinished(sortInfo) {
+        if (sortInfo.property !== this.sortInfo.property ||
+            sortInfo.order !== this.sortInfo.order) {
+            return;
+        }
         this.sorted = true;
-        this.sortData = data;
         this.updateView();
-        this.publish('SORTED', data);
-        console.timeEnd(timerId);
+        this.publish('SORTED', this.sortInfo);
+        this.stopSortTimer();
     }
 
     onFetchWorkerMessage(event) {
@@ -79,16 +93,21 @@ export default class QuotesList extends Component {
                 this.model = this.model.slice(0, this.max);
             }
             if (this.sorted) {
-                this.sortByProperty(this.sortData.property, this.sortData.order);
+                this.onSortRequested(this.sortInfo);
+            } else {
+                this.updateView();
             }
-            this.updateView();
             this.publish('LOADING', false);
             this.stopFetchTimer();
         }
     }
 
     onSortWorkerMessage(event) {
-        console.log(event);
+        if (event.data.action !== 'sortSuccess') {
+            return;
+        }
+        this.model = event.data.payload;
+        this.onSortFinished(event.data.sortInfo);
     }
 
     async fetchData() {
@@ -99,7 +118,7 @@ export default class QuotesList extends Component {
         await this.fetchQuotes(num);
         this.mergeData();
         if (this.sorted) {
-            this.sortByProperty(this.sortData.property, this.sortData.order);
+            this.sortByProperty(this.sortInfo.property, this.sortInfo.order);
         }
         this.updateView();
         this.publish('LOADING', false);
@@ -168,5 +187,15 @@ export default class QuotesList extends Component {
     stopFetchTimer() {
         console.timeEnd(this.fetchTimerId);
         this.fetchTimerId = null;
+    }
+
+    startSortTimer(prefix) {
+        this.sortTimerId = `${prefix}-${new Date().getTime()}`;
+        console.time(this.sortTimerId);
+    }
+
+    stopSortTimer() {
+        console.timeEnd(this.sortTimerId);
+        this.sortTimerId = null;
     }
 }
