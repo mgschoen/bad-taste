@@ -18,13 +18,13 @@
                 <p>The sorting takes up a lot of execution time, especially when data is growing. Time that the thread they are running in cannot use for other operations – such as dealing with user input.</p>
                 <p>Wait for the dataset to grow and then sort it by clicking on one of the arrows below. Try to hover over the other buttons while the script is sorting. Compare these two implementations:</p>
                 <p class="text-center">
-                    <a href="#" class="btn btn-secondary text-monospace">All Javascript running in main thread</a>
-                    <a href="/index-workers.html" class="btn btn-outline-secondary text-monospace m-3">Fetching and sorting running in workers</a>
+                    <a href="/index.html" class="btn btn-outline-secondary text-monospace">All Javascript running in main thread</a>
+                    <a href="#" class="btn btn-secondary text-monospace m-3">Fetching and sorting running in workers</a>
                 </p>
                 <small><sup>1</sup> Actually, the sorting has been made <a href="https://github.com/mgschoen/bad-taste/blob/master/src/workers/SortWorker.js#L21-L24">extra expensive</a> for demo purposes.</small>
             </div>
         </section>
-        <table class="table" data-component="QuotesList" data-use-workers="false">
+        <table class="table" data-component="QuotesList" data-use-workers="true">
             <thead>
                 <tr>
                     <th scope="col" data-component="LoadingSpinner">
