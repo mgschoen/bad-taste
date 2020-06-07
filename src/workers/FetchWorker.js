@@ -1,10 +1,13 @@
 import 'regenerator-runtime/runtime.js';
+import Constants from '../constants/constants';
 
-const usersApiBaseUrl = 'https://randomuser.me/api/';
-const quotesApiBaseUrl = 'https://binaryjazz.us/wp-json/genrenator/v1/story/';
-const fetchMax = 80;
-const fetchMin = 40;
-const fetchInterval = 2000;
+const {
+    usersApiBaseUrl,
+    quotesApiBaseUrl,
+    fetchMax,
+    fetchMin,
+    fetchInterval
+} = Constants;
 
 let users = [];
 let quotes = [];

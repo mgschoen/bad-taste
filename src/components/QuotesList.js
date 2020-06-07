@@ -1,20 +1,21 @@
 import { Component } from 'component-loader-js';
+import Constants from '../constants/constants';
 
 export default class QuotesList extends Component {
     constructor() {
         super(...arguments);
 
-        this.usersApiBaseUrl = 'https://randomuser.me/api/';
-        this.quotesApiBaseUrl = 'https://binaryjazz.us/wp-json/genrenator/v1/story/';
+        this.usersApiBaseUrl = Constants.usersApiBaseUrl;
+        this.quotesApiBaseUrl = Constants.quotesApiBaseUrl;
         this.users = [];
         this.quotes = [];
         this.model = [];
         this.sorted = false;
         this.sortInfo = {};
-        this.max = 1500;
-        this.fetchMin = 40;
-        this.fetchMax = 80;
-        this.fetchInterval = 2000;
+        this.max = Constants.quotesMax;
+        this.fetchMin = Constants.fetchMin;
+        this.fetchMax = Constants.fetchMax;
+        this.fetchInterval = Constants.fetchInterval;
 
         this.useWorkers = false;
         this.fetchWorker = null;
@@ -34,10 +35,7 @@ export default class QuotesList extends Component {
             .querySelector('[data-quotes-list-el="table-row-prototype"]')
             .outerHTML;
 
-        this.sortFunctions = {
-            asc: (a, b) => a < b ? -1 : b < a ? 1 : 0,
-            desc: (a, b) => a < b ? 1 : b < a ? -1 : 0
-        };
+        this.sortFunctions = Constants.sortFunctions;
 
         this.subscribe('SORT_REQUESTED', this.onSortRequested);
 

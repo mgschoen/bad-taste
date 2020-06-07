@@ -1,7 +1,6 @@
-const sortFunctions = {
-    asc: (a, b) => a < b ? -1 : b < a ? 1 : 0,
-    desc: (a, b) => a < b ? 1 : b < a ? -1 : 0
-};
+import Constants from '../constants/constants';
+
+const { sortFunctions } = Constants;
 
 self.addEventListener('message', event => {
     const { sortInfo, payload } = event.data;
